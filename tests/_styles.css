@@ -1,0 +1,14 @@
+html{
+	background: black;
+	color: #0f0;
+}
+a{
+	color: #00f;
+}
+body > nav{
+	background: black;
+	border-bottom: 1px solid;
+	padding: 0.5em;
+	position: sticky;
+	top: 0;
+}
