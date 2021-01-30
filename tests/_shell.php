@@ -2,14 +2,12 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Internal 2 - SPAify tests</title>
+		<title><?=($this->has('title') ? $this->get('title') . ' - ' : '')?>SPAify tests</title>
 		<link rel="stylesheet" href="/_styles.css" />
 	</head>
 	<body>
-		<main>
-			<h1>Internal 2</h1>
-			<p>Hello there from internal 2</p>
-		</main>
+		<main><?=$this->get('main')?></main>
+		<footer>&lt;toby&gt; SPAify project</footer>
 		<script src="/_scripts.js" type="module"></script>
 	</body>
 </html>
