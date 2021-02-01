@@ -18,8 +18,9 @@ var SPAify = createClass({
 		//--element to operate on. defaults to `window.document`
 		containerEl: undefined,
 
-		//--selector for link elements we want to override to load as SPA
+		//--selectors for link and form elements we want to override to load as SPA
 		linkSelector: 'a[href^="/"],a[href^="./"],a[href^="../"],a[href^="' + window.location.origin + '"]',
+		formSelector: 'form',
 
 		//--array of selectors to replace from fetched content into DOM. defaults to `['main', 'title']`
 		manageEls: undefined,
@@ -32,6 +33,8 @@ var SPAify = createClass({
 			window.addEventListener('popstate', function(event){
 				_self.handleStatePop(event);
 			});
+
+			//--override internal links to use our loading logic
 			this.containerEl.addEventListener('click', function(event){
 				//--don't override if not left click or modifier key pressed
 				if(event.which !== 1 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey){
@@ -48,6 +51,16 @@ var SPAify = createClass({
 					_self.loadPage(target.href);
 				}
 			}, false);
+
+			//--override form submissions to use our loading logic
+			if(window.FormData && window.URLSearchParams){
+				this.containerEl.addEventListener('submit', function(event){
+					if(event.target.matches(_self.formSelector)){
+						event.preventDefault();
+						_self.handleSubmission(event.target);
+					}
+				}, false);
+			}
 
 			//--set data for initial page for when going back
 			var initialData = this.getStateDataForEl(this.containerEl);
@@ -71,6 +84,24 @@ var SPAify = createClass({
 			});
 			return data;
 		},
+		handleSubmission: function(form){
+			var opts = {
+				method: form.method ? form.method.toUpperCase() : 'POST',
+			};
+			var formData = new FormData(form);
+			var action = form.action || window.location.href;
+			if(opts.method === 'GET'){
+				var qs = new window.URLSearchParams(formData).toString();
+				if(action.indexOf('?') === -1){
+					action += '?' + qs;
+				}else{
+					action += '&' + qs;
+				}
+			}else{
+				opts.body = formData;
+			}
+			this.loadPage(action, opts);
+		},
 		handleStateChange: function(data, isNewLoad){
 			//-! remove loading message
 			var _self = this;
@@ -86,10 +117,13 @@ var SPAify = createClass({
 		handleStatePop: function(event){
 			this.handleStateChange(event.state);
 		},
-		loadPage: function(href){
+		loadPage: function(href, opts){
 			var _self = this;
+			if(!opts){
+				opts = {};
+			}
 			//-! show loading message
-			fetch(href).then(function(response){
+			fetch(href, opts).then(function(response){
 				response.text().then(function(text){
 					var tmpEl = document.createElement('div');
 					tmpEl.innerHTML = text;
