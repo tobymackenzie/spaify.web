@@ -25,6 +25,9 @@ var SPAify = createClass({
 		//--array of selectors to replace from fetched content into DOM. defaults to `['main', 'title']`
 		manageEls: undefined,
 
+		//--messages
+		formErrorMessage: 'There was an error submitting your form.  Please try again.',
+
 		/*====
 		==methods
 		=====*/
@@ -84,6 +87,19 @@ var SPAify = createClass({
 			});
 			return data;
 		},
+		handleLoadError: function(href, fetchOpts){
+			if(!fetchOpts){
+				fetchOpts = {};
+			}
+			if(!fetchOpts.method || fetchOpts.method === 'GET'){
+				//--let's just bypass fetch if we have an error and nothing to put into the DOM
+				window.location = href;
+			}else{
+				//--since we can't send POST data with `window.location`, let's just alert user generically
+				//-! should we get the form element into here, disable SPAify, and force submit the form?
+				alert(this.formErrorMessage);
+			}
+		},
 		handleSubmission: function(form){
 			var opts = {
 				method: form.method ? form.method.toUpperCase() : 'POST',
@@ -117,20 +133,26 @@ var SPAify = createClass({
 		handleStatePop: function(event){
 			this.handleStateChange(event.state);
 		},
-		loadPage: function(href, opts){
+		loadPage: function(href, fetchOpts){
 			var _self = this;
-			if(!opts){
-				opts = {};
+			if(!fetchOpts){
+				fetchOpts = {};
 			}
 			//-! show loading message
-			fetch(href, opts).then(function(response){
-				response.text().then(function(text){
+			return fetch(href, fetchOpts).then(function(response){
+				return response.text().then(function(text){
 					var tmpEl = document.createElement('div');
 					tmpEl.innerHTML = text;
 					var data = _self.getStateDataForEl(tmpEl);
+					if(!response.ok && !Object.keys(data).length){
+						return _self.handleLoadError(href, fetchOpts);
+					}
 					window.history.pushState(data, data.title || '', href);
 					_self.handleStateChange(data, true);
+
 				});
+			}).catch(function(){
+				_self.handleLoadError(href, fetchOpts);
 			});
 		},
 		replaceElContent: function(el, content){

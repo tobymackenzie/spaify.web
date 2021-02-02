@@ -43,6 +43,12 @@ $ts->set('main');
 		</label>
 <?php } ?>
 	</fieldset>
+	<div class="field">
+		<label>
+			<input name="error" type="checkbox" />
+			<span>Test error</span>
+		</label>
+	</div>
 	<button type="submit">Submit</button>
 </form>
 <?php
