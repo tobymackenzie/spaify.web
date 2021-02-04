@@ -98,7 +98,7 @@ var SPAify = createClass({
 			});
 			return data;
 		},
-		handleLoadError: function(href, fetchOpts){
+		handleLoadError: function(href, fetchOpts, el){
 			if(!fetchOpts){
 				fetchOpts = {};
 			}
@@ -106,9 +106,18 @@ var SPAify = createClass({
 				//--let's just bypass fetch if we have an error and nothing to put into the DOM
 				window.location = href;
 			}else{
-				//--since we can't send POST data with `window.location`, let's just alert user generically
-				//-! should we get the form element into here, disable SPAify, and force submit the form?
-				alert(this.formErrorMessage);
+				//--since we can't send POST data with `window.location`, lets try to submit the form
+				//-! could be problematic if form endpoint mutates something before failing, and second submission makes things worse
+				if(el){
+					if(typeof el.submit === 'function'){
+						el.submit();
+					}else{
+						HTMLFormElement.prototype.submit.call(el);
+					}
+				}else{
+					//--otherwise, show alert
+					alert(this.formErrorMessage);
+				}
 			}
 		},
 		handleSubmission: function(form){
@@ -127,7 +136,7 @@ var SPAify = createClass({
 			}else{
 				opts.body = formData;
 			}
-			this.loadPage(action, opts);
+			this.loadPage(action, opts, form);
 		},
 		handleStateChange: function(data, isNewLoad){
 			//-! remove loading message
@@ -144,7 +153,7 @@ var SPAify = createClass({
 		handleStatePop: function(event){
 			this.handleStateChange(event.state);
 		},
-		loadPage: function(href, fetchOpts){
+		loadPage: function(href, fetchOpts, el){
 			var _self = this;
 			if(!fetchOpts){
 				fetchOpts = {};
@@ -157,15 +166,15 @@ var SPAify = createClass({
 						tmpEl = tmpEl.querySelector('html');
 					}
 					var data = _self.getStateDataForEl(tmpEl);
-					if(!_self.doSPAifyResponse(response, data, tmpEl)){
-						return _self.handleLoadError(href, fetchOpts);
+					if(_self.doSPAifyResponse(response, data, tmpEl)){
+						window.history.pushState(data, data.title || '', href);
+						_self.handleStateChange(data, true);
+					}else{
+						_self.handleLoadError(href, fetchOpts, el);
 					}
-					window.history.pushState(data, data.title || '', href);
-					_self.handleStateChange(data, true);
-
 				});
 			}).catch(function(){
-				_self.handleLoadError(href, fetchOpts);
+				_self.handleLoadError(href, fetchOpts, el);
 			});
 		},
 		replaceElContent: function(el, content){

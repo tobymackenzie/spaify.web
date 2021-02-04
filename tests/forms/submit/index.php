@@ -3,9 +3,13 @@ require_once(__DIR__ . '/../../_inc.php');
 $method = strtoupper($_SERVER['REQUEST_METHOD']);
 if(!empty(${'_' . $method}['error'])){
 	http_response_code(500);
-	$ts->set('title', 'Form Submit');
-	$ts->set('main', '<p>There was an unknown error processing the form.</p>');
-	echo $ts;
+	if(${'_' . $method}['error'] === 'spa'){
+		$ts->set('title', 'Form Submit');
+		$ts->set('main', '<p>There was an unknown error processing the form.</p>');
+		echo $ts;
+	}else{
+		echo '<!doctype html><meta charset="utf-8" /><title>Form Error</title><h1>Form Error</h1><p>Non-SPA form error</p>';
+	}
 	return;
 }
 $ts->set('title', 'Form Submit');

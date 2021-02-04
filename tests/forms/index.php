@@ -45,8 +45,14 @@ $ts->set('main');
 	</fieldset>
 	<div class="field">
 		<label>
-			<input name="error" type="checkbox" />
-			<span>Test error</span>
+			<input name="error" type="radio" value="spa" />
+			<span>Test SPAified error</span>
+		</label>
+	</div>
+	<div class="field">
+		<label>
+			<input name="error" type="radio" value="nospa" />
+			<span>Test non-SPAified error</span>
 		</label>
 	</div>
 	<button type="submit">Submit</button>
