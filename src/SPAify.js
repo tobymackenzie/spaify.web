@@ -15,24 +15,32 @@ var SPAify = createClass({
 		/*=====
 		==config
 		======*/
-		//--element to operate on. defaults to `window.document`
-		containerEl: undefined,
-
-		//--selectors for link and form elements we want to override to load as SPA
-		linkSelector: 'a[href^="/"],a[href^="./"],a[href^="../"],a[href^="' + window.location.origin + '"]',
-		formSelector: 'form',
-
 		//--array of selectors to replace from fetched content into DOM. defaults to `['main', 'title']`
 		manageEls: undefined,
 
+		//--element to operate on. defaults to `window.document`
+		containerEl: undefined,
+
+		//--id to separate this from other spa or non-spa
+		id: undefined,
+
 		//--messages
 		formErrorMessage: 'There was an error submitting your form.  Please try again.',
+
+		//--selectors for link and form elements we want to override to load as SPA
+		formSelector: 'form',
+		linkSelector: 'a[href^="/"],a[href^="./"],a[href^="../"],a[href^="' + window.location.origin + '"]',
 
 		/*====
 		==methods
 		=====*/
 		activate: function(){
 			var _self = this;
+
+			if(!this.id){
+				this.id = (this.containerEl === window.document ? this.containerEl.querySelector('html') : this.containerEl).dataset.spaify;
+			}
+
 			window.addEventListener('popstate', function(event){
 				_self.handleStatePop(event);
 			});
@@ -76,6 +84,9 @@ var SPAify = createClass({
 					el.setAttribute('aria-live', 'polite');
 				}
 			});
+		},
+		doSPAifyResponse: function(response, data, el){
+			return el.dataset.spaify === this.id;
 		},
 		getStateDataForEl: function(el){
 			var data = {};
@@ -146,7 +157,7 @@ var SPAify = createClass({
 						tmpEl = tmpEl.querySelector('html');
 					}
 					var data = _self.getStateDataForEl(tmpEl);
-					if(!response.ok && !Object.keys(data).length){
+					if(!_self.doSPAifyResponse(response, data, tmpEl)){
 						return _self.handleLoadError(href, fetchOpts);
 					}
 					window.history.pushState(data, data.title || '', href);

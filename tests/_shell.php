@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html data-spaify="1">
 	<head>
 		<meta charset="utf-8" />
 		<title><?=($this->has('title') ? $this->get('title') . ' - ' : '')?>SPAify tests</title>
