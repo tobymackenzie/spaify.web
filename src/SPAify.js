@@ -141,8 +141,10 @@ var SPAify = createClass({
 			//-! show loading message
 			return fetch(href, fetchOpts).then(function(response){
 				return response.text().then(function(text){
-					var tmpEl = document.createElement('div');
-					tmpEl.innerHTML = text;
+					var tmpEl = (new DOMParser()).parseFromString(text, 'text/html');
+					if(tmpEl instanceof HTMLDocument){
+						tmpEl = tmpEl.querySelector('html');
+					}
 					var data = _self.getStateDataForEl(tmpEl);
 					if(!response.ok && !Object.keys(data).length){
 						return _self.handleLoadError(href, fetchOpts);
