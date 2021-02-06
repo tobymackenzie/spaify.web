@@ -170,7 +170,7 @@ var SPAify = createClass({
 						window.history.pushState(data, data.title || '', href);
 						_self.handleStateChange(data, true);
 					}else{
-						_self.handleLoadError(href, fetchOpts, el);
+						throw 1;
 					}
 				});
 			}).catch(function(){
