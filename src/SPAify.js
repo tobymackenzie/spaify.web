@@ -3,9 +3,6 @@ import {BaseClass, create as createClass} from './classes.js';
 var SPAify = createClass({
 	init: function(){
 		BaseClass.prototype.init.apply(this, arguments);
-		if(!this.manageEls){
-			this.manageEls = ['main', 'title'];
-		}
 		if(!this.containerEl){
 			this.containerEl = window.document;
 		}
@@ -15,7 +12,7 @@ var SPAify = createClass({
 		/*=====
 		==config
 		======*/
-		//--array of selectors to replace from fetched content into DOM. defaults to `['main', 'title']`
+		//--array of selectors to replace from fetched content into DOM, configurable by user. required to function.  Example: `['main', 'title']`
 		manageEls: undefined,
 
 		//--element to operate on. defaults to `window.document`
@@ -39,6 +36,9 @@ var SPAify = createClass({
 
 			if(!this.id){
 				this.id = (this.containerEl === window.document ? this.containerEl.querySelector('html') : this.containerEl).dataset.spaify;
+			}
+			if(!this.manageEls){
+				return false;
 			}
 
 			window.addEventListener('popstate', function(event){

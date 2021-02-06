@@ -18,5 +18,5 @@ if(window.fetch){
 
 //--enable SPA functionality
 if(cutsMustard){
-	new SPAify();
+	new SPAify({manageEls: ['main', 'title']});
 }
