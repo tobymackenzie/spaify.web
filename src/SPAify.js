@@ -56,7 +56,7 @@ var SPAify = createClass({
 				if(!target.matches(_self.linkSelector)){
 					target = target.closest(_self.linkSelector);
 				}
-				if(target && target.matches(_self.linkSelector)){
+				if(target && _self.doSPAifyLink(target)){
 					event.preventDefault();
 					event.stopPropagation();
 					_self.loadPage(target.href);
@@ -66,7 +66,7 @@ var SPAify = createClass({
 			//--override form submissions to use our loading logic
 			if(window.FormData && window.URLSearchParams){
 				this.containerEl.addEventListener('submit', function(event){
-					if(event.target.matches(_self.formSelector)){
+					if(_self.doSPAifyForm(event.target)){
 						event.preventDefault();
 						_self.handleSubmission(event.target);
 					}
@@ -84,6 +84,12 @@ var SPAify = createClass({
 					el.setAttribute('aria-live', 'polite');
 				}
 			});
+		},
+		doSPAifyForm: function(el){
+			return el.matches(this.formSelector) && el.dataset.spaify !== 'false';
+		},
+		doSPAifyLink: function(el){
+			return el.matches(this.linkSelector) && el.dataset.spaify !== 'false';
 		},
 		doSPAifyResponse: function(response, data, el){
 			return el.dataset.spaify === this.id;
