@@ -8,6 +8,6 @@
 	<body>
 		<main><?=$this->get('main')?></main>
 		<footer>&lt;toby&gt; SPAify project</footer>
-		<script src="/_scripts.<?=file_exists(__DIR__ . '/_scripts.min.js') ? 'min' : ''?>.js" type="module"></script>
+		<script src="/_scripts<?=file_exists(__DIR__ . '/_scripts.min.js') ? '.min' : ''?>.js" type="module"></script>
 	</body>
 </html>

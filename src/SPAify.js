@@ -166,6 +166,10 @@ var SPAify = createClass({
 			}
 			//-! show loading message
 			return fetch(href, fetchOpts).then(function(response){
+				var contentType = response.headers.get('content-type');
+				if(!contentType || !contentType.match(/^(text\/html|application\/xhtml\+xml)/)){
+					throw 1;
+				}
 				return response.text().then(function(text){
 					var tmpEl = (new DOMParser()).parseFromString(text, 'text/html');
 					if(tmpEl instanceof HTMLDocument){
