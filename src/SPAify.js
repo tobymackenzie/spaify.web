@@ -108,6 +108,9 @@ var SPAify = createClass({
 			if(!fetchOpts){
 				fetchOpts = {};
 			}
+			if(!fetchOpts.credentials){
+				fetchOpts.credentials = 'same-origin';
+			}
 			if(!fetchOpts.method || fetchOpts.method === 'GET'){
 				//--let's just bypass fetch if we have an error and nothing to put into the DOM
 				window.location = href;
