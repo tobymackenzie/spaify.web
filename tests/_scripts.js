@@ -1,5 +1,5 @@
-import cutsMustard from '/_src/cutsMustard.js';
-import SPAify from '/_src/SPAify.js';
+import cutsMustard from './_src/cutsMustard.js';
+import SPAify from './_src/SPAify.js';
 
 //--load rest of shell
 if(window.fetch){

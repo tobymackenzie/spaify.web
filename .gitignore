@@ -2,3 +2,4 @@
 *.swo
 *.swp
 .DS_Store
+/tests/_scripts.min.js
