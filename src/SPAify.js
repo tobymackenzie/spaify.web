@@ -278,6 +278,7 @@ var SPAify = createClass({
 					}
 				});
 			}).catch(function(){
+				console.error('catch', arguments);
 				_self.handleLoadError(href, fetchOpts, el);
 			});
 		},
