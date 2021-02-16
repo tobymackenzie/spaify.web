@@ -2,9 +2,22 @@
 namespace TJM\SPAify\Test;
 class TestShell{
 	protected $activeRegions = [];
+	protected $id;
 	protected $main = '';
+	protected $rand;
 	protected $title = '';
 
+	public function __construct($data = []){
+		foreach($data as $key=> $value){
+			$this->$key = $value;
+		}
+		if(empty($this->id)){
+			$this->id = $_SERVER['REQUEST_URI'];
+		}
+		if(empty($this->rand)){
+			$this->rand = rand(0, 100);
+		}
+	}
 	public function __toString(){
 		while($this->activeRegions){
 			$this->end();

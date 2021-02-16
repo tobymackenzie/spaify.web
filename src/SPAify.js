@@ -1,5 +1,4 @@
 import {BaseClass, create as createClass} from './classes.js';
-
 var SPAify = createClass({
 	init: function(){
 		BaseClass.prototype.init.apply(this, arguments);
@@ -73,17 +72,31 @@ var SPAify = createClass({
 				}, false);
 			}
 
+			//--set up managed els
+			for(var i = 0; i < this.manageEls.length; ++i){
+				//--normalize managed el input
+				var elData = this.manageEls[i];
+				if(typeof elData !== 'object'){
+					elData = this.manageEls[i] = {select: elData};
+				}
+				if(!elData.do){
+					elData.do = 'content';
+				}
+				this.manageEls[i] = elData;
+
+				//--tell screen readers we'll be modifying these regions
+				if(elData.do === 'content' && elData.select){
+					var el = _self.containerEl.querySelector(elData.select);
+					if(el && !el.hasAttribute('aria-live')){
+						el.setAttribute('aria-live', 'polite');
+					}
+					elData.el = el
+				}
+			}
+
 			//--set data for initial page for when going back
 			var initialData = this.getStateDataForEl(this.containerEl);
 			window.history.replaceState(initialData, initialData.title || '');
-
-			//--tell screen readers we'll be modifying these regions
-			this.manageEls.forEach(function(selector){
-				var el = _self.containerEl.querySelector(selector);
-				if(el && !el.hasAttribute('aria-live')){
-					el.setAttribute('aria-live', 'polite');
-				}
-			});
 		},
 		doSPAifyForm: function(el){
 			return el.matches(this.formSelector) && el.dataset.spaify !== 'false';
@@ -95,12 +108,36 @@ var SPAify = createClass({
 			return el.dataset.spaify === this.id;
 		},
 		getStateDataForEl: function(el){
-			var data = {};
-			this.manageEls.forEach(function(selector){
-				var loadEl = el.querySelector(selector);
-				if(loadEl){
-					data[selector] =  loadEl.innerHTML;
+			var data = {foo: []};
+			this.manageEls.forEach(function(elData, i){
+				var select = elData.select || null;
+				var doo = elData.do;
+				var stateData = [];
+				if(select){
+					var loadEls = SPAify.getDocEls(select, el);
+					for(var j = 0; j < loadEls.length; ++j){
+						var loadEl = loadEls[j];
+						var elStateData = {};
+						switch(doo){
+							case 'attr':
+								var attrData = {};
+								for(var k = 0;  k < loadEl.attributes.length; ++k){
+									var attr = loadEl.attributes[k];
+									attrData[attr.name] = attr.value;
+								}
+								elStateData.attr = attrData;
+							break;
+							case 'content':
+								elStateData.content = loadEl.innerHTML;
+							break;
+							case 'replace':
+								elStateData.content = loadEl.outerHTML;
+							break;
+						}
+						stateData[j] = elStateData;
+					}
 				}
+				data.foo[i] = stateData;
 			});
 			return data;
 		},
@@ -150,8 +187,62 @@ var SPAify = createClass({
 		handleStateChange: function(data, isNewLoad){
 			//-! remove loading message
 			var _self = this;
-			this.manageEls.forEach(function(selector){
-				_self.replaceElContent(selector, data[selector] || '');
+			if(!data || !data.foo){
+				return false;
+			}
+			this.manageEls.forEach(function(elData, i){
+				var foo = data.foo[i] || null;
+				if(!foo){
+					return;
+				}
+				if(!elData.el){
+					if(elData.target){
+						elData.el = SPAify.getDocEl(elData.target, _self.containerEl);
+					}else if(elData.select && elData.do && (elData.do === 'attr' || elData.do === 'content')){
+						elData.el = SPAify.getDocEl(elData.select, _self.containerEl);
+					}
+				}
+				switch(elData.do){
+					case 'attr':
+						//--clear existing attr
+						for(var j = elData.el.attributes.length; --j >= 0;){
+							var attr = elData.el.attributes[j];
+							elData.el.removeAttribute(attr.name);
+						}
+
+						//--set new attr
+						foo.forEach(function(elIData){
+							for(var attr in elIData.attr || []){
+								elData.el.setAttribute(attr, elIData.attr[attr]);
+							}
+						});
+					break;
+					case 'content':
+						var _content = '';
+						foo.forEach(function(elIData){
+							_content += elIData.content || '';
+						});
+						_self.replaceElContent(elData.el || elData.select, _content);
+					break;
+					case 'replace':
+						if(elData.select && elData.el){
+							var oldEls = _self.containerEl.querySelectorAll(elData.select);
+
+							//--add new to document first so there won't be layout thrashing from removing stylesheets, etc
+							for(var j in foo){
+								var newEl = SPAify.createElement(foo[j].content);
+								elData.el[elData.method || 'append'](newEl);
+							}
+
+							//--remove existing elements
+							if(oldEls){
+								for(var j = 0; j < oldEls.length; ++j){
+									oldEls[j].remove();
+								}
+							}
+						}
+					break;
+				}
 			});
 
 			//--scroll to top like full page refresh if necessary
@@ -202,6 +293,23 @@ var SPAify = createClass({
 			}
 		},
 
+	},
+	statics: {
+		createElement: function(string){
+			var template = document.createElement('template');
+			template.innerHTML = string.trim();
+			return template.content.firstChild;
+		},
+		getDocEl: function(select, inEl){
+			return SPAify.getDocEls(select, inEl)[0] || null;
+		},
+		getDocEls: function(select, inEl){
+			if(select === 'html' && inEl.nodeName === 'HTML'){
+				return [inEl];
+			}else{
+				return inEl.querySelectorAll(select);
+			}
+		}
 	},
 });
 

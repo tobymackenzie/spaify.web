@@ -18,5 +18,17 @@ if(window.fetch){
 
 //--enable SPA functionality
 if(cutsMustard){
-	new SPAify({manageEls: ['main', 'title']});
+	new SPAify({manageEls: [
+		{select:
+			'head [data-aria="page"],'
+			+ 'link,'
+			+ 'meta:not([charset]),'
+			+ 'script[data-aria="page"]',
+			do: 'replace', method: 'append', target: 'head'
+		},
+		{select: 'html', do: 'attr'},
+		'main',
+		'title',
+		'body > aside',
+	]});
 }
