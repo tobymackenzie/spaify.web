@@ -5,7 +5,7 @@ $ts->set('title', $method . ' Form');
 $ts->set('main');
 ?>
 <h1><?=$ts->get('title')?></h1>
-<form action="/forms/submit" method="<?=$method?>">
+<form action="/forms/submit/" method="<?=$method?>">
 	<p>Test form submission.</p>
 	<div class="field">
 		<label>
