@@ -1,5 +1,4 @@
-import cutsMustard from './_src/cutsMustard.js';
-import SPAify from './_src/SPAify.js';
+import spaify from './_src/main.js';
 
 //--load rest of shell
 if(window.fetch){
@@ -14,21 +13,4 @@ if(window.fetch){
 			}
 		});
 	});
-}
-
-//--enable SPA functionality
-if(cutsMustard){
-	new SPAify({manageEls: [
-		{select:
-			'head [data-aria="page"],'
-			+ 'link,'
-			+ 'meta:not([charset]),'
-			+ 'script[data-aria="page"]',
-			do: 'replace', method: 'append', target: 'head'
-		},
-		{select: 'html', do: 'attr'},
-		'main',
-		'title',
-		'body > aside',
-	]});
 }
