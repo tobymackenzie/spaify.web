@@ -3,7 +3,7 @@ import SPAify from './SPAify.js';
 
 var spaify = undefined;
 if(cutsMustard){
-	spaify = new SPAify({manageEls: [
+	spaify = new SPAify({targets: [
 		{select:
 			'head [data-aria="page"],'
 			+ 'link:not([name="viewport"]),'

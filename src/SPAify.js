@@ -2,8 +2,8 @@ import {BaseClass, create as createClass} from './classes.js';
 var SPAify = createClass({
 	init: function(){
 		BaseClass.prototype.init.apply(this, arguments);
-		if(!this.containerEl){
-			this.containerEl = window.document;
+		if(!this.container){
+			this.container = window.document;
 		}
 		this.activate();
 	},
@@ -12,10 +12,10 @@ var SPAify = createClass({
 		==config
 		======*/
 		//--array of selectors to replace from fetched content into DOM, configurable by user. required to function.  Example: `['main', 'title']`
-		manageEls: undefined,
+		targets: undefined,
 
 		//--element to operate on. defaults to `window.document`
-		containerEl: undefined,
+		container: undefined,
 
 		//--id to separate this from other spa or non-spa
 		id: undefined,
@@ -24,8 +24,8 @@ var SPAify = createClass({
 		formErrorMessage: 'There was an error submitting your form.  Please try again.',
 
 		//--selectors for link and form elements we want to override to load as SPA
-		formSelector: 'form',
-		linkSelector: 'a[href^="/"],a[href^="./"],a[href^="../"],a[href^="' + window.location.origin + '"]',
+		forms: 'form',
+		links: 'a[href^="/"],a[href^="./"],a[href^="../"],a[href^="' + window.location.origin + '"]',
 
 		/*====
 		==methods
@@ -34,9 +34,9 @@ var SPAify = createClass({
 			var _self = this;
 
 			if(!this.id){
-				this.id = (this.containerEl === window.document ? this.containerEl.querySelector('html') : this.containerEl).dataset.spaify;
+				this.id = (this.container === window.document ? this.container.querySelector('html') : this.container).dataset.spaify;
 			}
-			if(!this.manageEls){
+			if(!this.targets){
 				return false;
 			}
 
@@ -45,15 +45,15 @@ var SPAify = createClass({
 			});
 
 			//--override internal links to use our loading logic
-			this.containerEl.addEventListener('click', function(event){
+			this.container.addEventListener('click', function(event){
 				//--don't override if not left click or modifier key pressed
 				if(event.which !== 1 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey){
 					return true;
 				}
 
 				var target = event.target;
-				if(!target.matches(_self.linkSelector)){
-					target = target.closest(_self.linkSelector);
+				if(!target.matches(_self.links)){
+					target = target.closest(_self.links);
 				}
 				if(target && _self.doSPAifyLink(target)){
 					event.preventDefault();
@@ -64,7 +64,7 @@ var SPAify = createClass({
 
 			//--override form submissions to use our loading logic
 			if(window.FormData && window.URLSearchParams){
-				this.containerEl.addEventListener('submit', function(event){
+				this.container.addEventListener('submit', function(event){
 					if(_self.doSPAifyForm(event.target)){
 						event.preventDefault();
 						_self.handleSubmission(event.target);
@@ -72,21 +72,21 @@ var SPAify = createClass({
 				}, false);
 			}
 
-			//--set up managed els
-			for(var i = 0; i < this.manageEls.length; ++i){
-				//--normalize managed el input
-				var elData = this.manageEls[i];
+			//--set up target els
+			for(var i = 0; i < this.targets.length; ++i){
+				//--normalize target el input
+				var elData = this.targets[i];
 				if(typeof elData !== 'object'){
-					elData = this.manageEls[i] = {select: elData};
+					elData = this.targets[i] = {select: elData};
 				}
 				if(!elData.do){
 					elData.do = 'content';
 				}
-				this.manageEls[i] = elData;
+				this.targets[i] = elData;
 
 				//--tell screen readers we'll be modifying these regions
 				if(elData.do === 'content' && elData.select){
-					var el = _self.containerEl.querySelector(elData.select);
+					var el = _self.container.querySelector(elData.select);
 					if(el && !el.hasAttribute('aria-live')){
 						el.setAttribute('aria-live', 'polite');
 					}
@@ -95,21 +95,21 @@ var SPAify = createClass({
 			}
 
 			//--set data for initial page for when going back
-			var initialData = this.getStateDataForEl(this.containerEl);
+			var initialData = this.getStateDataForEl(this.container);
 			window.history.replaceState(initialData, initialData.title || '');
 		},
 		doSPAifyForm: function(el){
-			return el.matches(this.formSelector) && el.dataset.spaify !== 'false';
+			return el.matches(this.forms) && el.dataset.spaify !== 'false';
 		},
 		doSPAifyLink: function(el){
-			return el.matches(this.linkSelector) && el.dataset.spaify !== 'false';
+			return el.matches(this.links) && el.dataset.spaify !== 'false';
 		},
 		doSPAifyResponse: function(response, data, el){
 			return el.dataset.spaify === this.id;
 		},
 		getStateDataForEl: function(el){
 			var data = {foo: []};
-			this.manageEls.forEach(function(elData, i){
+			this.targets.forEach(function(elData, i){
 				var select = elData.select || null;
 				var doo = elData.do;
 				var stateData = [];
@@ -190,16 +190,16 @@ var SPAify = createClass({
 			if(!data || !data.foo){
 				return false;
 			}
-			this.manageEls.forEach(function(elData, i){
+			_self.targets.forEach(function(elData, i){
 				var foo = data.foo[i] || null;
 				if(!foo){
 					return;
 				}
 				if(!elData.el){
 					if(elData.target){
-						elData.el = SPAify.getDocEl(elData.target, _self.containerEl);
+						elData.el = SPAify.getDocEl(elData.target, _self.container);
 					}else if(elData.select && elData.do && (elData.do === 'attr' || elData.do === 'content')){
-						elData.el = SPAify.getDocEl(elData.select, _self.containerEl);
+						elData.el = SPAify.getDocEl(elData.select, _self.container);
 					}
 				}
 				switch(elData.do){
@@ -226,7 +226,7 @@ var SPAify = createClass({
 					break;
 					case 'replace':
 						if(elData.select && elData.el){
-							var oldEls = _self.containerEl.querySelectorAll(elData.select);
+							var oldEls = _self.container.querySelectorAll(elData.select);
 
 							//--add new to document first so there won't be layout thrashing from removing stylesheets, etc
 							for(var j in foo){
@@ -284,7 +284,7 @@ var SPAify = createClass({
 		},
 		replaceElContent: function(el, content){
 			if(typeof el === 'string'){
-				el = this.containerEl.querySelector(el)
+				el = this.container.querySelector(el)
 			}
 			if(el){
 				el.innerHTML = content;
