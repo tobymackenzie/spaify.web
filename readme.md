@@ -20,6 +20,5 @@ To Do
 - show a loading spinner while fetching content
 - support animating in new content
 - good way to handle running page-load js on new content while excluding shell content and non-content js
-- pubsub
 - use tmclasses as third party code: need good way to load from node_modules for both browser and build tools, internally and for external use
 - unit tests

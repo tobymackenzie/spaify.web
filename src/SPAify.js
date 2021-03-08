@@ -250,6 +250,8 @@ var SPAify = tmclasses.create({
 			if(isNewLoad){
 				window.scrollTo(0, 0);
 			}
+
+			_self.pub('load', data, isNewLoad);
 		},
 		handleStatePop: function(event){
 			this.handleStateChange(event.state);

@@ -14,3 +14,7 @@ if(window.fetch){
 		});
 	});
 }
+
+spaify.sub('load', function(){
+	console.log('spaify content loaded', arguments);
+})
