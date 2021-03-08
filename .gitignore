@@ -2,4 +2,6 @@
 *.swo
 *.swp
 .DS_Store
+/package-lock.json
+/node_modules
 /tests/_scripts.min.js

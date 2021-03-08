@@ -1,5 +1,6 @@
-import {BaseClass, create as createClass} from './classes.js';
-var SPAify = createClass({
+import tmclasses from '../node_modules/@tobymackenzie/tmclasses.js/src/main.js';
+var BaseClass = tmclasses.BaseClass;
+var SPAify = tmclasses.create({
 	init: function(){
 		BaseClass.prototype.init.apply(this, arguments);
 		if(!this.container){

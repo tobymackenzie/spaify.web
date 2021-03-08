@@ -1,0 +1,7 @@
+{
+	"name": "@tobymackenzie/spaify",
+	"main": "src/main.js",
+	"dependencies": {
+		"@tobymackenzie/tmclasses.js": "github:tobymackenzie/tmclasses.js#semver:^v0.2"
+	}
+}
