@@ -3,15 +3,13 @@
 chdir(__DIR__ . '/../tests');
 
 //--build js
-if(!empty(shell_exec('which rollup')) && !empty(shell_exec('which uglifyjs'))){
-	$command = 'rollup _scripts.js --format iife --silent';
-	$command .= ' | uglifyjs --compress --mangle';
-	$command .= ' >  _scripts.min.js';
+if(!empty(shell_exec('which rollup'))){
+	$command = 'rollup -c _rollup.js';
 	passthru($command);
 	echo "minified to " . filesize('_scripts.min.js') . " bytes\n";
 	$headerBytes = 313;
 	$fileBytes = (int) trim(shell_exec('gzip -c -9 _scripts.min.js | wc -c'));
 	echo "minzipped to ≈" . $fileBytes . " bytes (≈" . ($headerBytes + $fileBytes) . " with headers)\n";
 }else{
-	throw new Exception("`rollup` and `uglifyjs` must be installed for building");
+	throw new Exception("`rollup` must be installed for building");
 }

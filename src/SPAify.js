@@ -1,4 +1,4 @@
-import tmclasses from '../node_modules/@tobymackenzie/tmclasses.js/src/main.js';
+import tmclasses from '@tobymackenzie/tmclasses.js/src/main.js';
 var BaseClass = tmclasses.BaseClass;
 var SPAify = tmclasses.create({
 	init: function(){

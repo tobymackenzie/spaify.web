@@ -56,7 +56,12 @@ class HTTP{
 		$mimeType = $this->getMimeType($path);
 		if($mimeType){
 			header("Content-Type: {$mimeType}");
-			echo file_get_contents($path);
+			$content = file_get_contents($path);
+			if($mimeType === 'application/javascript'){
+				$content = preg_replace('/(import .* from [\'"])([\w@])/', '$1/node_modules/$2', $content);
+				$content = preg_replace('/(import [\'"])([\w@])/', '$1/node_modules/$2', $content);
+			}
+			echo $content;
 		}else{
 			$this->send404();
 		}
