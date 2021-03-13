@@ -1,9 +1,14 @@
 <?php
 require_once(__DIR__ . '/../../_inc.php');
 $method = strtoupper($_SERVER['REQUEST_METHOD']);
-if(!empty(${'_' . $method}['error'])){
+if($method === 'GET'){
+	$values = &$_GET;
+}else{
+	$values = &$_POST;
+}
+if(!empty($values['error'])){
 	http_response_code(500);
-	if(${'_' . $method}['error'] === 'spa'){
+	if($values['error'] === 'spa'){
 		$ts->set('title', 'Form Submit');
 		$ts->set('main', '<p>There was an unknown error processing the form.</p>');
 		echo $ts;
@@ -19,17 +24,12 @@ $ts->set('main');
 <dl>
 	<dt>Method</dt>
 	<dd><?=$ts->e($method)?></dd>
-<?php
-foreach(['GET', 'POST', 'FILES'] as $name){
-	$values = ${'_' . $name};
-	if($values){
-?>
-	<dt><?=$name?></dt>
+	<dt><?=$method?></dt>
 	<dd><?=$ts->e($values)?></dd>
-<?php
-	}
-}
-?>
+<?php if($_FILES){ ?>
+	<dt>Files</dt>
+	<dd><?=$ts->e($_FILES)?></dd>
+<?php } ?>
 <dl>
 <?php
 $ts->end('main');

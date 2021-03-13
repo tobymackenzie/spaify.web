@@ -1,14 +1,5 @@
 <?php
 require_once(__DIR__ . '/_inc.php');
-//--handle 404 here because cli-server uses home page file as router for 404s by default
-if(!(empty($_SERVER['PATH_INFO']) || $_SERVER['PATH_INFO'] === '/')){
-	http_response_code(404);
-	$ts->set('title', '500 Not Found');
-	$ts->set('main', '<h1>404 Not Found</h1><p>Apologies. Could not find what you asked for.</p>');
-	$ts->end('main');
-	echo $ts;
-	die();
-}
 $ts->set('main');
 ?>
 <h1>Tests Home</h1>

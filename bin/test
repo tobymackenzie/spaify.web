@@ -13,4 +13,4 @@ while(!$found){
 }
 echo "opening test server on localhost:{$port}\n";
 // exec("open http://localhost:{$port}");
-passthru("php -S localhost:{$port}");
+passthru("php -S localhost:{$port} _srv.php");
